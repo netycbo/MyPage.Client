@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,10 +10,15 @@
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="MyPage.Client.styles.css" rel="stylesheet" />
 </head>
-
 <body>
-    <div id="app" background-color: #333; >
-        <span class="loader"></span>
+    <div class="blazor-loading-overlay" id="loading-overlay">
+        <div class="loading-container">
+            <div class="loader"></div>
+            <div class="loading-message">Loading...</div>
+        </div>
+    </div>
+
+    <div id="app">
     </div>
 
     <div id="blazor-error-ui">
@@ -22,24 +26,30 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
-    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script src="_framework/blazor.webassembly.js"></script>
     <script>
-        Blazor.start({
-            logLevel: 1, 
-            reconnectionOptions: {
-                maxRetries: 3,
-                retryIntervalMilliseconds: 2000,
-            },
-            async onLoadError() {
-                console.error('Blazor failed to load');
-            },
-            onRuntimeError: function (type, file, line, column, message) {
-                console.error(`Runtime error: ${message} at ${file}:${line}:${column}`);
-            }
-        }).catch(function (error) {
-            console.error('Blazor initialization error:', error);
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.classList.add('fade-out');
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 300);
+                }
+            }, 1000); 
+        });
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay && overlay.style.display !== 'none') {
+                    overlay.classList.add('fade-out');
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 300);
+                }
+            }, 2000);
         });
     </script>
 </body>
-
 </html>

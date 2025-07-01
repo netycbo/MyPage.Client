@@ -43,7 +43,7 @@ public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration
         {
             logger.LogError(ex, "Error processing SendEmail request");
             var errorResponse = req.CreateResponse(HttpStatusCode.InternalServerError);
-            await errorResponse.WriteStringAsync("Internal server error");
+            await errorResponse.WriteStringAsync($"Internal server error: {ex.Message}");
             return errorResponse;
         }
     }
