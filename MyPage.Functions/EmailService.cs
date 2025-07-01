@@ -72,9 +72,14 @@ public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration
             logger.LogInformation("Email sent successfully to {FromEmail}", fromEmail);
             return true;
         }
+        catch (SmtpCommandException ex)
+        {
+            logger.LogError("SMTP COMMAND ERROR: {Message} | Code: {StatusCode}", ex.Message, ex.StatusCode);
+            return false;
+        }
         catch (Exception ex)
         {
-            logger.LogError(ex, "MailKit błąd SMTP");
+            logger.LogError(ex, "MailKit general SMTP error");
             return false;
         }
     }
