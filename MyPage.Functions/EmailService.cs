@@ -12,7 +12,7 @@ using System.Text.Json;
 
 namespace MyPage.Functions;
 
-public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration config)
+public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration config) : ISendEmailFunction
 {
     [Function("SendEmail")]
     public async Task<HttpResponseData> SendEmail([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)

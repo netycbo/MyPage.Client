@@ -26,7 +26,24 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
-    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
+        Blazor.start({
+            logLevel: 1, 
+            reconnectionOptions: {
+                maxRetries: 3,
+                retryIntervalMilliseconds: 2000,
+            },
+            async onLoadError() {
+                console.error('Blazor failed to load');
+            },
+            onRuntimeError: function (type, file, line, column, message) {
+                console.error(`Runtime error: ${message} at ${file}:${line}:${column}`);
+            }
+        }).catch(function (error) {
+            console.error('Blazor initialization error:', error);
+        });
+    </script>
 </body>
 
 </html>
