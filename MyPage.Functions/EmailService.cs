@@ -15,7 +15,7 @@ namespace MyPage.Functions;
 public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration config) : ISendEmailFunction
 {
     [Function("SendEmail")]
-    public async Task<HttpResponseData> SendEmail([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
+    public async Task<HttpResponseData> SendEmail([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
     {
         logger.LogInformation("SendEmail function processing request.");
         try
