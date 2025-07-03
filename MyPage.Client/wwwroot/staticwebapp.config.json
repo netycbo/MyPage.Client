@@ -1,11 +1,17 @@
 {
+  "globalHeaders": {
+    "Access-Control-Allow-Origin": "https://mikolaj-silinski.no",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  },
   "routes": [
     {
       "route": "/api/*",
-      "allowedRoles": [ "anonymous" ]
+      "headers": {
+        "Access-Control-Allow-Origin": "https://mikolaj-silinski.no",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
+      }
     }
-  ],
-  "platform": {
-    "apiRuntime": "dotnet-isolated:8.0"
-  }
+  ]
 }
