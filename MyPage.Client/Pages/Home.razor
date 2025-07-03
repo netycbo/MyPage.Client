@@ -158,7 +158,28 @@
     private string Message { get; set; }
     private bool isLoading = false;
     private bool isSuccess = false;
+    protected override async void OnInitialized()
+    {
+        await TrackPageVisit();
+    }
+    private async Task TrackPageVisit()
+    {
+        try
+        {
+            var pageData = new
+            {
+                page = "Home",
+                visitTime = DateTime.UtcNow
+            };
 
+            await Http.PostAsJsonAsync("/api/TrackPageVisit", pageData);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't break the page
+            Console.WriteLine($"Failed to track page visit: {ex.Message}");
+        }
+    }
     private async Task SendEmail()
     {
         isLoading = true;
