@@ -20,7 +20,6 @@ public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration
         logger.LogInformation("SendEmail function processing request.");
         try
         {
-            // Odczytaj dane z requestu
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var emailRequest = JsonSerializer.Deserialize<EmailRequest>(requestBody, new JsonSerializerOptions
             {
