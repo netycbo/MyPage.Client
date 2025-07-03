@@ -15,7 +15,6 @@ namespace MyPage.Functions;
 public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration config) : ISendEmailFunction
 {
     [Function("SendEmail")]
-   [EnableCors("_myAllowSpecificOrigins")]
     public async Task<HttpResponseData> SendEmail([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
     {
         logger.LogInformation("SendEmail function processing request.");

@@ -14,7 +14,6 @@ namespace MyPage.Functions;
 public class TrackPageVisit(ILogger<TrackPageVisit> logger, TelemetryClient telemetryClient)
 {
     [Function("TrackPageVisit")]
-    [EnableCors("_myAllowSpecificOrigins")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req)
     {
         try
@@ -60,7 +59,7 @@ public class TrackPageVisit(ILogger<TrackPageVisit> logger, TelemetryClient tele
     private class PageVisitDataDto
     {
         [JsonPropertyName("page")]
-        [JsonRequired]
+        
         public string? Page { get; set; }
         [JsonPropertyName("visitTime")]
         public DateTime VisitTime { get; set; }
