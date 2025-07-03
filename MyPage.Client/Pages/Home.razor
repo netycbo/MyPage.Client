@@ -172,7 +172,11 @@
                 visitTime = DateTime.UtcNow
             };
 
-            await Http.PostAsJsonAsync("/api/TrackPageVisit", pageData);
+           var respons = await Http.PostAsJsonAsync("/api/TrackPageVisit", pageData);
+           if (!respons.IsSuccessStatusCode)
+            {
+                var errorMessage = await respons.Content.ReadFromJsonAsync<EmailResponse>();
+            }
         }
         catch (Exception ex)
         {

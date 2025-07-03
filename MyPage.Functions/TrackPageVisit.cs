@@ -6,6 +6,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MyPage.Functions;
 
@@ -39,8 +40,6 @@ public class TrackPageVisit(ILogger<TrackPageVisit> logger, TelemetryClient tele
             logger.LogInformation($"Tracking event with properties: {string.Join(", ", properties.Select(p => $"{p.Key}={p.Value}"))}");
 
             telemetryClient.TrackEvent("PageVisit", properties);
-
-            // Flush to ensure data is sent immediately (useful for debugging)
             telemetryClient.Flush();
 
             logger.LogInformation("PageVisit event tracked successfully");
@@ -58,7 +57,10 @@ public class TrackPageVisit(ILogger<TrackPageVisit> logger, TelemetryClient tele
     }
     private class PageVisitDataDto
     {
+        [JsonPropertyName("page")]
+        [JsonRequired]
         public string? Page { get; set; }
+        [JsonPropertyName("visitTime")]
         public DateTime VisitTime { get; set; }
     }
 }
