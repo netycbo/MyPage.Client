@@ -171,7 +171,7 @@
                 page = "Home",
                 visitTime = DateTime.UtcNow
             };
-
+          
            var respons = await Http.PostAsJsonAsync("/api/TrackPageVisit", pageData);
            if (!respons.IsSuccessStatusCode)
             {

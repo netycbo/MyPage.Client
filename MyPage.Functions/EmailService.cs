@@ -18,6 +18,13 @@ public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration
     public async Task<HttpResponseData> SendEmail([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
     {
         logger.LogInformation("SendEmail function processing request.");
+        var response = req.CreateResponse();
+        AddCorsHeaders(response);
+        if (req.Method == "OPTIONS")
+        {
+            response.StatusCode = HttpStatusCode.OK;
+            return response;
+        }
         try
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -27,13 +34,14 @@ public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration
             });
             if (emailRequest == null)
             {
-                var badResponse = req.CreateResponse(HttpStatusCode.BadRequest);
-                await badResponse.WriteStringAsync("Invalid request data");
-                return badResponse;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                await response.WriteStringAsync("Invalid request data");
+                return response;
             }
 
             bool success = await SendEmailAsync(emailRequest.FromName, emailRequest.FromEmail, emailRequest.Message);
-            var response = req.CreateResponse(success ? System.Net.HttpStatusCode.OK : HttpStatusCode.InternalServerError);
+
+            response.StatusCode = success ? HttpStatusCode.OK : HttpStatusCode.InternalServerError;
             var result = new { success = success, message = success ? "Email sent successfully" : "Failed to send email" };
             await response.WriteAsJsonAsync(result);
             return response;
@@ -81,6 +89,13 @@ public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration
             logger.LogError(ex, "MailKit general SMTP error");
             return false;
         }
+    }
+    private void AddCorsHeaders(HttpResponseData response)
+    {
+        response.Headers.Add("Access-Control-Allow-Origin", "https://mikolaj-silinski.no");
+        response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.Headers.Add("Access-Control-Allow-Credentials", "true");
     }
 }
 public class EmailRequest

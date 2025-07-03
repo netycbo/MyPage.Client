@@ -5,22 +5,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = FunctionsApplication.CreateBuilder(args);
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowBlazorClient", policy =>
-    {
-        policy.WithOrigins(
-            "https://mikolaj-silinski.no",
-            "https://proud-stone-0db686703.2.azurestaticapps.net"
+////builder.Services.AddCors(options =>
+////{
+////    options.AddPolicy("AllowBlazorClient", policy =>
+////    {
+////        policy.WithOrigins(
+////            "https://mikolaj-silinski.no",
+////            "https://proud-stone-0db686703.2.azurestaticapps.net"
 
-        )
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials();
-    });
-});
+////        )
+////        .AllowAnyHeader()
+////        .AllowAnyMethod()
+////        .AllowCredentials();
+////    });
+////});
 builder.ConfigureFunctionsWebApplication();
 builder.Services
     .AddApplicationInsightsTelemetryWorkerService()

@@ -16,6 +16,12 @@ public class TrackPageVisit(ILogger<TrackPageVisit> logger, TelemetryClient tele
     [Function("TrackPageVisit")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req)
     {
+        if (req.Method == "OPTIONS")
+        {
+            var response = new OkResult();
+            AddCorsHeaders(req.HttpContext.Response);
+            return response;
+        }
         try
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -53,7 +59,9 @@ public class TrackPageVisit(ILogger<TrackPageVisit> logger, TelemetryClient tele
             telemetryClient.TrackException(ex);
             telemetryClient.Flush();
 
-            return new StatusCodeResult(500);
+            var errorResponse = new StatusCodeResult(500);
+            AddCorsHeaders(req.HttpContext.Response);
+            return errorResponse;
         }
     }
     private class PageVisitDataDto
@@ -63,5 +71,12 @@ public class TrackPageVisit(ILogger<TrackPageVisit> logger, TelemetryClient tele
         public string? Page { get; set; }
         [JsonPropertyName("visitTime")]
         public DateTime VisitTime { get; set; }
+    }
+    private void AddCorsHeaders(HttpResponse response)
+    {
+        response.Headers.Add("Access-Control-Allow-Origin", "https://mikolaj-silinski.no");
+        response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.Headers.Add("Access-Control-Allow-Credentials", "true");
     }
 }
