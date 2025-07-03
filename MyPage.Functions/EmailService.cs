@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit;
-using MailKit.Net.Smtp;
 using System.Net;
-
 using System.Text.Json;
 
 namespace MyPage.Functions;
@@ -15,6 +15,7 @@ namespace MyPage.Functions;
 public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration config) : ISendEmailFunction
 {
     [Function("SendEmail")]
+   [EnableCors("_myAllowSpecificOrigins")]
     public async Task<HttpResponseData> SendEmail([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
     {
         logger.LogInformation("SendEmail function processing request.");

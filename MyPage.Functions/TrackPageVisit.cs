@@ -1,5 +1,6 @@
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -13,6 +14,7 @@ namespace MyPage.Functions;
 public class TrackPageVisit(ILogger<TrackPageVisit> logger, TelemetryClient telemetryClient)
 {
     [Function("TrackPageVisit")]
+    [EnableCors("_myAllowSpecificOrigins")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req)
     {
         try
