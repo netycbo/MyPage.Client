@@ -1,4 +1,5 @@
 ﻿@page "/"
+@layout MainLayout
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager Navigation
 @inject HttpClient Http
@@ -30,9 +31,8 @@
                                <p class="text-center">
                                 Min <a href="https://github.com/netycbo"> GitHub </a> 
                                </p>
-                            dokladniej o tym projekcie <a @onclick="NavigateToAboutProject" href="">tutaj</a>
+                            dokladniej o tym projekcie <NavLink href="/aboutProject">sdfsd</NavLink>
                             </div> 
-                            
                        </div>
                     
                     </div>
@@ -169,10 +169,10 @@
     private string Message { get; set; }
     private bool isLoading = false;
     private bool isSuccess = false;
-    protected override async void OnInitialized()
-    {
-        await TrackPageVisit();
-    }
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await TrackPageVisit();
+    // }
     private async Task TrackPageVisit()
     {
         try
@@ -182,9 +182,9 @@
                 page = "Home",
                 visitTime = DateTime.UtcNow
             };
-          
-           var respons = await Http.PostAsJsonAsync("/api/TrackPageVisit", pageData);
-           if (respons.IsSuccessStatusCode)
+
+            var respons = await Http.PostAsJsonAsync("/api/TrackPageVisit", pageData);
+            if (!respons.IsSuccessStatusCode)
             {
                 var errorMessage = await respons.Content.ReadFromJsonAsync<EmailResponse>();
             }
@@ -194,10 +194,6 @@
             // Log error but don't break the page
             Console.WriteLine($"Failed to track page visit: {ex.Message}");
         }
-    }
-    private void NavigateToAboutProject()
-    {
-        Navigation.NavigateTo("/about-project");
     }
     private async Task SendEmail()
     {
