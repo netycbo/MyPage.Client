@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Smtp;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ using System.Text.Json;
 
 namespace MyPage.Functions;
 
-public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration config) : ISendEmailFunction
+public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration config, TelemetryClient telemetryClient) : ISendEmailFunction
 {
     [Function("SendEmail")]
     public async Task<HttpResponseData> SendEmail([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
@@ -40,7 +41,13 @@ public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration
             }
 
             bool success = await SendEmailAsync(emailRequest.FromName, emailRequest.FromEmail, emailRequest.Message);
-
+            telemetryClient.TrackEvent("EmailSendAttempt", new Dictionary<string, string>
+            {
+                { "Success", success.ToString() },
+                { "FromEmail", emailRequest.FromEmail }
+            });
+            telemetryClient.Flush();
+            await Task.Delay(500);
             response.StatusCode = success ? HttpStatusCode.OK : HttpStatusCode.InternalServerError;
             var result = new { success = success, message = success ? "Email sent successfully" : "Failed to send email" };
             await response.WriteAsJsonAsync(result);
