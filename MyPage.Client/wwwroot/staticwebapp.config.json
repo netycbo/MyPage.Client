@@ -9,6 +9,10 @@
         "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, Origin",
         "Access-Control-Allow-Credentials": "true"
       }
+    },
+    {
+      "route": "/*",
+      "rewrite": "/index.html"
     }
   ],
   "responseOverrides": {

@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using System.ComponentModel.DataAnnotations
+@inject NavigationManager Navigation
 @inject HttpClient Http
 <PageTitle>Home</PageTitle>
 
@@ -24,6 +25,16 @@
                         <p class="text-center">
                             Hvis du vil ansette meg eller bare snakke, <a href="#contact">kontakt</a> meg.
                         </p>
+                        <div class="row">
+                            <div class="col-sm-6">
+                               <p class="text-center">
+                                Min <a href="https://github.com/netycbo"> GitHub </a> 
+                               </p>
+                            dokladniej o tym projekcie <a @onclick="NavigateToAboutProject" href="">tutaj</a>
+                            </div> 
+                            
+                       </div>
+                    
                     </div>
                 </div>
             </div>
@@ -173,7 +184,7 @@
             };
           
            var respons = await Http.PostAsJsonAsync("/api/TrackPageVisit", pageData);
-           if (!respons.IsSuccessStatusCode)
+           if (respons.IsSuccessStatusCode)
             {
                 var errorMessage = await respons.Content.ReadFromJsonAsync<EmailResponse>();
             }
@@ -183,6 +194,10 @@
             // Log error but don't break the page
             Console.WriteLine($"Failed to track page visit: {ex.Message}");
         }
+    }
+    private void NavigateToAboutProject()
+    {
+        Navigation.NavigateTo("/about-project");
     }
     private async Task SendEmail()
     {

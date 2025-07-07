@@ -1,5 +1,54 @@
 ﻿@page "/about-project"
+@inject HttpClient Http
+<div class="containerAbout main-text-container">
+        <div class="main-text">
+            <h2>Witaj w Moim Projekcie!</h2>
+        <p>
+            Masz rację, przepraszam za pominięcie tych ważnych detali! Uzupełnijmy opis o te aspekty, zachowując przy tym zwięzłość idealną na stronę wizytówkę.
+            Nowoczesna Aplikacja Webowa: Blazor WASM i Azure Functions
+            Ten projekt to nowoczesna aplikacja webowa, wykorzystująca Blazor WebAssembly (WASM) Standalone dla interaktywnego interfejsu użytkownika, pisanego w całości w C#. Warstwa backendowa oparta jest na Azure Functions, co zapewnia skalowalność i wydajność dzięki architekturze bezserwerowej.
+            Interfejs użytkownika, stworzony z użyciem HTML, CSS i Bootstrap, gwarantuje responsywność i spójny wygląd. Całość jest hostowana na platformie Azure Static Web Apps, oferującej automatyczne wdrożenia (CI/CD) i globalną dystrybucję treści.
+            Domena i serwer SMTP są zarządzane przez zewnętrznych dostawców, co zapewnia elastyczność i możliwość wykorzystania specjalistycznych usług do profesjonalnej komunikacji e-mail.
+            Projekt łączy siłę .NET po stronie klienta z elastycznością bezserwerowego backendu i infrastrukturą Azure, tworząc efektywne kosztowo i łatwe w utrzymaniu rozwiązanie, idealne dla dynamicznych aplikacji internetowych.
+        </p>
+        </div>
+    </div>
+
+    <div class="containerAbout grid-container">
+        <div class="grid-item">
+            <h3>Total page visits from deploy (02.07.2025)</h3>
+            <p>@GetTotalVisits</p>
+        </div>
+        <div class="grid-item">
+            <h3>Emails send with (hoppefully) job offer</h3>
+            <p>@GetTotalEmailsSent</p>
+        </div>
+        <div class="grid-item">
+            <h3>Visits in this week vs last week</h3>
+            <p>@WeekToWeekVisits</p>
+        </div>
+        <div class="grid-item">
+            <h3>Most Visits From Country By IP</h3>
+   @*          <p>@visitsFromCountryByIp</p> *@
+        </div>
+    </div>
+
 
 @code {
+    private int GetTotalVisits { get; set; }
+    private int GetTotalEmailsSent { get; set; }
+    private int WeekToWeekVisits { get; set; } 
+    // private VisitsFromCountryByIp visitsFromCountryByIp { get; set; } = new VisitsFromCountryByIp();
 
-}
+    protected override async Task OnInitializedAsync()
+    {
+        var responseForTotalVisits = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetTotalVisit");
+        GetTotalVisits = responseForTotalVisits != null && responseForTotalVisits.TryGetValue("totalVisits", out var totalVisits) ? totalVisits : 0;
+
+        var responseForTotalEmailsSent = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetTotalEmailsSent");
+        GetTotalEmailsSent = responseForTotalEmailsSent != null && responseForTotalEmailsSent.TryGetValue("totalEmailsSent", out var totalEmailsSent) ? totalEmailsSent : 69;
+
+        var responseForWeekToWeekVisits = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetWeekToWeekVisits");
+        WeekToWeekVisits = responseForWeekToWeekVisits != null && responseForWeekToWeekVisits.TryGetValue("weekToWeekVisits", out var weekToWeekVisits) ? weekToWeekVisits : 0;
+    }
+}   
