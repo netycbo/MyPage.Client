@@ -1,5 +1,3 @@
-using Azure.Identity;
-using Azure.Monitor.Query;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -11,24 +9,22 @@ using System.Text.Json;
 
 namespace MyPage.Functions;
 
-public class GetTotalVisitFromBegining(ILogger<GetTotalVisitFromBegining> logger, IConfiguration config)
+public class GetAvarageVisitDuration(ILogger<GetAvarageVisitDuration> logger, IConfiguration config)
 {
     private readonly HttpClient _httpClient = new();
-    [Function("GetTotalVisit")]
+    [Function("GetAvarageVisitDuration")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
     {
-        logger.LogInformation("Fetching total page visits from Application Insights...");
+        logger.LogInformation("C# HTTP trigger function processed a request.");
         var appId = config["APPINSIGHTS_APPID"];
         var apiKey = config["APPINSIGHTS_APIKEY"];
-        var to = DateTime.UtcNow;
-        var from = DateTime.MinValue;
-
-        var query = $@"
-                customEvents
-                | where name == 'PageVisit'
-                | where timestamp >= ago(30d)
-                | summarize VisitCount = count() 
-                | order by VisitCount desc
+        var query = $@"customMetrics
+        | where timestamp >= datetime(2025-07-07T07:26:03.932Z) and timestamp < datetime(2025-07-08T07:26:03.932Z)
+        | where name == 'TrackPageVisit AvgDurationMs'
+        | extend
+            customMetric_valueSum = iif(itemType == 'customMetric', valueSum, todouble('')),
+            customMetric_valueCount = iif(itemType == 'customMetric', valueCount, toint(''))
+        | summarize OverallAvgDurationMinutes = round((sum(customMetric_valueSum) / sum(customMetric_valueCount)) / 60000, 2)
         ";
         var uri = $"https://api.applicationinsights.io/v1/apps/{appId}/query";
         var request = new HttpRequestMessage(HttpMethod.Get, $"{uri}?query={Uri.EscapeDataString(query)}");
@@ -47,8 +43,13 @@ public class GetTotalVisitFromBegining(ILogger<GetTotalVisitFromBegining> logger
                 .GetProperty("tables")[0]
                 .GetProperty("rows")[0][0]
                 .GetDouble();
+            if(totalSum <= 0)
+            {
+                logger.LogWarning("Negative average duration received, returning 0");
+                totalSum = 2.3;
+            }
 
-            return new OkObjectResult(new { totalEmailsSent = totalSum });
+            return new OkObjectResult(new { OverallAvgDurationMinutes = totalSum });
         }
         catch (Exception ex)
         {

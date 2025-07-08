@@ -42,7 +42,12 @@ public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration
             }
 
             bool success = await SendEmailAsync(emailRequest.FromName, emailRequest.FromEmail, emailRequest.Message);
-            telemetryClient.TrackEvent("EmailSentSuccessfully");
+            telemetryClient.TrackEvent("EmailSentSuccessfully", new Dictionary<string, string>
+{
+                { "From", emailRequest.FromEmail },
+                { "Name", emailRequest.FromName }
+             });
+
             telemetryClient.Flush();
             logger.LogInformation("Email sent successfully and tracked.");
             response.StatusCode = success ? HttpStatusCode.OK : HttpStatusCode.InternalServerError;

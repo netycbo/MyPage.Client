@@ -160,7 +160,6 @@
     </section>
 </div>
 
-
 @code {
     private ContactFormModel form = new();
     private string statusMessage { get; set; } = string.Empty;
@@ -233,7 +232,6 @@
         {
             isSuccess = false;
             statusMessage = "An error occurred. Please try again later.";
-            // Log error (można dodać logger jeśli potrzebny)
         }
         finally
         {

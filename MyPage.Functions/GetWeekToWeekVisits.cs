@@ -1,5 +1,3 @@
-using Azure.Identity;
-using Azure.Monitor.Query;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -11,25 +9,40 @@ using System.Text.Json;
 
 namespace MyPage.Functions;
 
-public class GetTotalVisitFromBegining(ILogger<GetTotalVisitFromBegining> logger, IConfiguration config)
+public class GetWeekToWeekVisits(ILogger<GetWeekToWeekVisits> logger, IConfiguration config)
 {
     private readonly HttpClient _httpClient = new();
-    [Function("GetTotalVisit")]
+    [Function("GetWeekToWeekVisits")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
     {
-        logger.LogInformation("Fetching total page visits from Application Insights...");
+        logger.LogInformation("C# HTTP trigger function processed a request.");
         var appId = config["APPINSIGHTS_APPID"];
         var apiKey = config["APPINSIGHTS_APIKEY"];
-        var to = DateTime.UtcNow;
-        var from = DateTime.MinValue;
-
         var query = $@"
+            let currentWeek =
                 customEvents
                 | where name == 'PageVisit'
-                | where timestamp >= ago(30d)
-                | summarize VisitCount = count() 
-                | order by VisitCount desc
-        ";
+                | where timestamp >= ago(7d)
+                | where tostring(customDimensions.Page) == 'Home'
+                | summarize CurrentWeekVisits = count();
+            let previousWeek =
+                customEvents
+                | where name == 'PageVisit'
+                | where timestamp between (ago(14d) .. ago(7d))
+                | where tostring(customDimensions.Page) == 'Home'
+                | summarize PreviousWeekVisits = count();
+            currentWeek
+            | extend Page = 'Home'
+            | join kind=fullouter (previousWeek | extend Page = 'Home') on Page
+            | extend
+                CurrentWeekVisits = iff(isnull(CurrentWeekVisits), 0, CurrentWeekVisits),
+                PreviousWeekVisits = iff(isnull(PreviousWeekVisits), 0, PreviousWeekVisits)
+            | extend
+                ChangePercent = iff(PreviousWeekVisits == 0 and CurrentWeekVisits == 0, 0.0, 
+                               iff(PreviousWeekVisits == 0, 100.0, 
+                                   round((CurrentWeekVisits - PreviousWeekVisits) * 100.0 / PreviousWeekVisits, 1)))
+            | project ChangePercent
+            ";
         var uri = $"https://api.applicationinsights.io/v1/apps/{appId}/query";
         var request = new HttpRequestMessage(HttpMethod.Get, $"{uri}?query={Uri.EscapeDataString(query)}");
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -48,7 +61,7 @@ public class GetTotalVisitFromBegining(ILogger<GetTotalVisitFromBegining> logger
                 .GetProperty("rows")[0][0]
                 .GetDouble();
 
-            return new OkObjectResult(new { totalEmailsSent = totalSum });
+            return new OkObjectResult(new { pageVisitChangeInPercent = totalSum });
         }
         catch (Exception ex)
         {
