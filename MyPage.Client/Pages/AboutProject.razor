@@ -92,10 +92,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _ = LoadTotalVisits();
-        _ = LoadTotalEmailsSent();
-        _ = LoadWeekToWeekVisits();
-        _ = LoadAvarageVisitDuration();
+       await Task.WhenAll(
+       LoadTotalVisits(),
+       LoadTotalEmailsSent(),
+       LoadWeekToWeekVisits(),
+       LoadAvarageVisitDuration()
+        );
     }
 
     private async Task LoadTotalVisits()
