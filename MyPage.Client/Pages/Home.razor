@@ -184,9 +184,9 @@
                 page = "Home",
                 visitTime = DateTime.UtcNow
             };
-          
-           var respons = await Http.PostAsJsonAsync("/api/TrackPageVisit", pageData);
-           if (!respons.IsSuccessStatusCode)
+
+            var respons = await Http.PostAsJsonAsync("/api/TrackPageVisit", pageData);
+            if (!respons.IsSuccessStatusCode)
             {
                 var errorMessage = await respons.Content.ReadFromJsonAsync<EmailResponse>();
             }
@@ -214,7 +214,7 @@
 
             var response = await Http.PostAsJsonAsync("/api/SendEmail", emailData);
 
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<EmailResponse>();
                 isSuccess = result?.Success ?? false;
@@ -235,7 +235,7 @@
         {
             isSuccess = false;
             statusMessage = "An error occurred. Please try again later.";
-            // Log error (można dodać logger jeśli potrzebny)
+            Console.WriteLine(ex);
         }
         finally
         {
