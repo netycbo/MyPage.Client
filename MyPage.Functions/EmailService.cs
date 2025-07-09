@@ -7,13 +7,14 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Abstractions;
 using MimeKit;
 using System.Net;
 using System.Text.Json;
 
 namespace MyPage.Functions;
 
-public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration config, TelemetryClient telemetryClient) : ISendEmailFunction
+public class SendEmailFunction(ILogger<SendEmailFunction> logger, IConfiguration config, TelemetryClient telemetryClient)
 {
     [Function("SendEmail")]
     public async Task<HttpResponseData> SendEmail([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)

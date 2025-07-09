@@ -1,5 +1,67 @@
-﻿@page "/about-project"
+﻿@page "/aboutProject"
+@using System.Text.Json
+@inject HttpClient Http
+@layout MainLayout
+
+<div class="containerAbout main-text-container">
+    <div class="main-text">
+        <h2>Litt mer om prosjektet</h2>
+        <p>
+            Moderne nettapplikasjon: Blazor WASM og Azure Functions
+            Dette prosjektet er en moderne nettapplikasjon som benytter Blazor WebAssembly (WASM) Standalone for et interaktivt brukergrensesnitt skrevet utelukkende i C#. Backend-laget er basert på Azure Functions, som gir skalerbarhet og høy ytelse takket være serverløs arkitektur.
+            Brukergrensesnittet er utviklet med HTML, CSS og Bootstrap, og sikrer responsivt design og et konsekvent visuelt uttrykk. Applikasjonen er hostet på Azure Static Web Apps, som tilbyr automatisk distribusjon (CI/CD) og global innholdslevering.
+            Domenet og SMTP-serveren administreres av eksterne leverandører, noe som gir fleksibilitet og mulighet til å bruke spesialiserte tjenester for profesjonell e-postkommunikasjon.
+            Prosjektet kombinerer kraften i .NET på klientsiden med fleksibiliteten til en serverløs backend og Azures infrastruktur – og skaper en kostnadseffektiv og vedlikeholdsvennlig løsning, ideell for dynamiske webapplikasjoner.
+        </p>
+        <p>
+            Er du fornøyd med det du ser? Tror du at jeg kan være til nytte i din bedrift? <a href="/#contact">Skriv</a> gjerne til meg.
+        </p>
+        <p>
+            Nedenfor finner du noen sanntidsdata hentet fra Azure Application Insights.
+        </p>
+     </div>
+</div>
+
+<div class="containerAbout grid-container">
+    <div class="grid-item">
+        <h3>Total page visits from deploy (02.07.2025)</h3>
+        <p>@GetTotalVisits</p>
+    </div>
+    <div class="grid-item">
+        <h3>Emails send with (hoppefully) job offer</h3>
+        <p>@GetTotalEmailsSent</p>
+    </div>
+    <div class="grid-item">
+        <h3>Visits in this week vs last week</h3>
+        <p>@WeekToWeekVisits</p>
+    </div>
+    <div class="grid-item">
+        <h3>Avarage visit duration in minutes</h3>
+        <p>AvarageVisitDuration</p>
+    </div>
+</div>
+
 
 @code {
+    private int GetTotalVisits { get; set; }
+    private int GetTotalEmailsSent { get; set; }
+    private int WeekToWeekVisits { get; set; }
+    private int AvarageVisitDuration { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var responseForAvarageVisitDuration = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetAvarageVisitDuration");
+        AvarageVisitDuration = responseForAvarageVisitDuration != null && responseForAvarageVisitDuration.TryGetValue("avarageVisitDuration", out var avarageVisitDuration) ? avarageVisitDuration : 0;
+       
+        var responseForTotalVisits = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetTotalVisit");
+        GetTotalVisits = responseForTotalVisits != null && responseForTotalVisits.TryGetValue("totalVisits", out var totalVisits) ? totalVisits : 666;
+
+        var responseForTotalEmailsSent = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetTotalEmailsSent");
+        GetTotalEmailsSent = responseForTotalEmailsSent != null && responseForTotalEmailsSent.TryGetValue("totalEmailsSent", out var totalEmailsSent) ? totalEmailsSent : 69;
+
+        var responseForWeekToWeekVisits = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetWeekToWeekVisits");
+        WeekToWeekVisits = responseForWeekToWeekVisits != null && responseForWeekToWeekVisits.TryGetValue("weekToWeekVisits", out var weekToWeekVisits) ? weekToWeekVisits : 0;
+    }
 }
+
+
