@@ -27,7 +27,11 @@ namespace MyPage.Functions
             try
             {
                 var response = await _httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+                if (!response.IsSuccessStatusCode)
+                {
+                    logger.LogError($"Błąd HTTP: {(int)response.StatusCode} {response.ReasonPhrase}");
+                    return null;
+                }
 
                 var json = await response.Content.ReadAsStringAsync();
                 var doc = JsonDocument.Parse(json);
