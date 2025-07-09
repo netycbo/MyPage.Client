@@ -1,13 +1,10 @@
 ﻿using MailKit.Net.Smtp;
 using Microsoft.ApplicationInsights;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Abstractions;
 using MimeKit;
 using System.Net;
 using System.Text.Json;

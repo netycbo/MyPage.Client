@@ -214,21 +214,17 @@
 
             var response = await Http.PostAsJsonAsync("/api/SendEmail", emailData);
 
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<EmailResponse>();
                 isSuccess = result?.Success ?? false;
-                statusMessage = isSuccess ? "Message sent successfully!" : "Failed to send message.";
-
-                if (isSuccess)
-                {
-                    form = new ContactFormModel(); // Reset form
-                }
+                statusMessage = result?.Message ?? "Message sent.";
             }
             else
             {
+                var text = await response.Content.ReadAsStringAsync();
+                statusMessage = $"Failed to send message. Status: {(int)response.StatusCode}. Body: {text}";
                 isSuccess = false;
-                statusMessage = "Failed to send message. Please try again.";
             }
         }
         catch (Exception ex)
