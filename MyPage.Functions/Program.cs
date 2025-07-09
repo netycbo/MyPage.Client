@@ -3,9 +3,10 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MyPage.Functions;
 
 var builder = FunctionsApplication.CreateBuilder(args);
-
+builder.Services.AddScoped<ITelemetryApiCall, TelemetryApiCall>();
 ////builder.Services.AddCors(options =>
 ////{
 ////    options.AddPolicy("AllowBlazorClient", policy =>
