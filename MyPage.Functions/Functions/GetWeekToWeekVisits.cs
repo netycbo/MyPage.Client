@@ -1,3 +1,5 @@
+using MailKit;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -6,14 +8,16 @@ using System.Threading.Tasks;
 
 namespace MyPage.Functions.Functions;
 
-public class GetWeekToWeekVisits(ILogger<GetWeekToWeekVisits> logger, ITelemetryApiCall apiCall)
+public class GetWeekToWeekVisits(ILogger<GetWeekToWeekVisits> logger, ITelemetryApiCall apiCall, TelemetryClient telemetry)
 {
    
     [Function("GetWeekToWeekVisits")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
     {
-        logger.LogInformation("fetching week to week ratio data ");
-         var query = @"
+        try
+        {
+            logger.LogInformation("fetching week to week ratio data ");
+            var query = @"
                         let currentWeek =
                 customEvents
                 | where name == 'PageVisit'
@@ -41,16 +45,22 @@ public class GetWeekToWeekVisits(ILogger<GetWeekToWeekVisits> logger, ITelemetry
 )
             | project ChangePercent        
          ";
-        var weekToWeekData = await apiCall.GetTelemetryData(query);
-        if (weekToWeekData != null)
-        {
-            logger.LogInformation("Week to week visits fetched successfully.");
-            return new OkObjectResult( new { total = weekToWeekData.Value });
+            var weekToWeekData = await apiCall.GetTelemetryData(query);
+            if (weekToWeekData != null)
+            {
+                logger.LogInformation("Week to week visits fetched successfully.");
+                return new OkObjectResult(new { total = weekToWeekData.Value });
+            }
         }
-        else
+        catch (Exception ex)
         {
-            logger.LogError("Failed to fetch week to week visits.");
-            return new StatusCodeResult(500);
+            telemetry.TrackException(ex, new Dictionary<string, string>
+            {
+                { "Function", "GetWeekToWeekVisits" },
+                { "Path", req.Path },
+                { "QueryString", req.QueryString.ToString() }
+            });
         }
+        return new BadRequestObjectResult(new { error = "Unable to fetch total GetWeekToWeekVisits." });
     }
 }

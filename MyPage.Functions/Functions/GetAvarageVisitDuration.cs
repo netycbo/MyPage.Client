@@ -1,3 +1,5 @@
+using MailKit;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -6,14 +8,16 @@ using System.Threading.Tasks;
 
 namespace MyPage.Functions.Functions;
 
-public class GetAvarageVisitDuration(ILogger<GetAvarageVisitDuration> logger, ITelemetryApiCall apiCall)
+public class GetAvarageVisitDuration(ILogger<GetAvarageVisitDuration> logger, ITelemetryApiCall apiCall, TelemetryClient telemetry)
 {
    
     [Function("GetAvarageVisitDuration")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
     {
-        logger.LogInformation("Fetching avarage visit duration data");
-        var query =@" 
+        try
+        {
+            logger.LogInformation("Fetching avarage visit duration data");
+            var query = @" 
             customMetrics
                     | where timestamp >= datetime(2025 - 07 - 07T07: 26:03.932Z) and timestamp<datetime(2025 - 07 - 08T07: 26:03.932Z)
                     | where name == 'TrackPageVisit AvgDurationMs'
@@ -22,17 +26,24 @@ public class GetAvarageVisitDuration(ILogger<GetAvarageVisitDuration> logger, IT
                         customMetric_valueCount = iif(itemType == 'customMetric', valueCount, toint(''))
                     | summarize OverallAvgDurationMinutes = round((sum(customMetric_valueSum) / sum(customMetric_valueCount)) / 60000, 2)
             ";
-        var averageDuration = await apiCall.GetTelemetryData(query);
-        if (averageDuration.HasValue)
-        {
-            logger.LogInformation("Avarage visit duration fetched successfully.");
-            return new OkObjectResult(new { averageDuration = averageDuration.Value });
+            var averageDuration = await apiCall.GetTelemetryData(query);
+            if (averageDuration.HasValue)
+            {
+                logger.LogInformation("Avarage visit duration fetched successfully.");
+                return new OkObjectResult(new { averageDuration = averageDuration.Value });
+            }
         }
-        else
+        catch (Exception ex)
         {
-            logger.LogError("Failed to fetch avarage visit duration.");
-            return new StatusCodeResult(500);
+            logger.LogError(ex, "Error fetching average visit duration");
+            telemetry.TrackException(ex, new Dictionary<string, string>
+            {
+                { "Function", "GetAvarageVisitDuration" },
+                { "Path", req.Path },
+                { "QueryString", req.QueryString.ToString() }
+            });
+            
         }
-       
+        return new BadRequestObjectResult(new { error = "Unable to fetch total AvarageVisitDurations." });
     }
 }

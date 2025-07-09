@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace MyPage.Functions
 {
-    public class TelemetryApiCall(IConfiguration config, ILogger<TelemetryApiCall> logger) : ITelemetryApiCall
+    public class TelemetryApiCall(IConfiguration config, ILogger<TelemetryApiCall> logger, TelemetryClient telemetry) : ITelemetryApiCall
     {
         private readonly HttpClient _httpClient = new();
         public async Task<int?> GetTelemetryData(string query)
