@@ -24,7 +24,7 @@ public class GetTotalEmailsSentFunction(ILogger<GetTotalEmailsSentFunction> logg
             if (totalCount.HasValue)
             {
                 logger.LogInformation("Total emails sent fetched successfully.");
-                return new OkObjectResult(new { total = totalCount.Value });
+                return new OkObjectResult(new { totalEmailsSent = totalCount.Value });
             }
         }
         catch (Exception ex)

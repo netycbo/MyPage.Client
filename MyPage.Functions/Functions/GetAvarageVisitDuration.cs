@@ -30,7 +30,7 @@ public class GetAvarageVisitDuration(ILogger<GetAvarageVisitDuration> logger, IT
             if (averageDuration.HasValue)
             {
                 logger.LogInformation("Avarage visit duration fetched successfully.");
-                return new OkObjectResult(new { averageDuration = averageDuration.Value });
+                return new OkObjectResult(new { avarageVisitDuration = averageDuration.Value });
             }
         }
         catch (Exception ex)

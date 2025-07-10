@@ -51,7 +51,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        GetTotalVisits = await Logging.GetIntValueAsync("/api/GetAvarageVisitDuration", "avarageVisitDuration", 0, "GetAvarageVisitDuration");
+        GetTotalVisits = await Logging.GetIntValueAsync("/api/GetAvarageVisitDuration", "total", 0, "GetAvarageVisitDuration");
         GetTotalEmailsSent = await Logging.GetIntValueAsync("/api/GetTotalEmailsSent", "totalEmailsSent", 0, "GetTotalEmailsSent");
         WeekToWeekVisits = await Logging.GetIntValueAsync("/api/GetWeekToWeekVisits", "weekToWeekVisits", 0, "GetWeekToWeekVisits");
         AvarageVisitDuration = await Logging.GetIntValueAsync("/api/GetAvarageVisitDuration", "avarageVisitDuration", 0, "GetAvarageVisitDuration");

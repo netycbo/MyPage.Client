@@ -18,11 +18,11 @@ public class GetTotalVisit(ILogger<GetTotalVisit> logger, ITelemetryApiCall apiC
         {
             logger.LogInformation("fetching total visits data");
             var query = $@"customEvents
-            | where name == 'PageVisit'
-            | where timestamp >= ago(30d)
-            | summarize VisitCount = count() 
-            | order by VisitCount desc
-            ";
+                | where name == 'PageVisit'
+                | where timestamp >= ago(30d)
+                | summarize VisitCount = count()
+                | project VisitCount
+                ";
             var totalCount = await apiCall.GetTelemetryData(query);
             if (totalCount.HasValue)
             {

@@ -49,7 +49,7 @@ public class GetWeekToWeekVisits(ILogger<GetWeekToWeekVisits> logger, ITelemetry
             if (weekToWeekData != null)
             {
                 logger.LogInformation("Week to week visits fetched successfully.");
-                return new OkObjectResult(new { total = weekToWeekData.Value });
+                return new OkObjectResult(new { weekToWeekVisits = weekToWeekData.Value });
             }
         }
         catch (Exception ex)
