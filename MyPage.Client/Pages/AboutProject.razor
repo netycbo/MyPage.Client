@@ -8,11 +8,12 @@
     <div class="main-text">
         <h2>Litt mer om prosjektet</h2>
         <p>
-            Moderne nettapplikasjon: Blazor WASM og Azure Functions
-            Dette prosjektet er en moderne nettapplikasjon som benytter Blazor WebAssembly (WASM) Standalone for et interaktivt brukergrensesnitt skrevet utelukkende i C#. Backend-laget er basert på Azure Functions, som gir skalerbarhet og høy ytelse takket være serverløs arkitektur.
-            Brukergrensesnittet er utviklet med HTML, CSS og Bootstrap, og sikrer responsivt design og et konsekvent visuelt uttrykk. Applikasjonen er hostet på Azure Static Web Apps, som tilbyr automatisk distribusjon (CI/CD) og global innholdslevering.
-            Domenet og SMTP-serveren administreres av eksterne leverandører, noe som gir fleksibilitet og mulighet til å bruke spesialiserte tjenester for profesjonell e-postkommunikasjon.
-            Prosjektet kombinerer kraften i .NET på klientsiden med fleksibiliteten til en serverløs backend og Azures infrastruktur – og skaper en kostnadseffektiv og vedlikeholdsvennlig løsning, ideell for dynamiske webapplikasjoner.
+            Prosjektet består av en Blazor WebAssembly (standalone) frontend og Azure Functions som backend. Applikasjonen er hostet på Azure Static Web Apps.
+            Jeg brukte Azure Application Insights for feilsøking og overvåking.
+            Siden Blazor WebAssembly kjører i nettleseren, støtter den ikke server-side logikk direkte. Derfor sendes logger fra frontend til Azure Functions. Derfra videresendes de til Application Insights.
+            Domenenavn og SMTP-server er levert av andre aktører, på grunn av lavere kostnader.
+            Jeg utviklet et egendefinert verktøy for å telle besøk på forsiden. Jeg laget også funksjoner for å overvåke antall sendte e-poster og hvor lenge brukeren er aktiv på siden.
+            Basert på disse verktøyene skrev jeg Kusto-spørringer for å hente data og analysere feil i Application Insights.
         </p>
         <p>
             Er du fornøyd med det du ser? Tror du at jeg kan være til nytte i din bedrift? <a href="/#contact">Skriv</a> gjerne til meg.
@@ -20,27 +21,28 @@
         <p>
             Nedenfor finner du noen sanntidsdata hentet fra Azure Application Insights.
         </p>
-     </div>
+    </div>
 </div>
 
 <div class="containerAbout grid-container">
     <div class="grid-item">
-        <h3>Total page visits from deploy (02.07.2025)</h3>
+        <h3>Total page visits since deployment (02.07.2025)</h3>
         <p>@GetTotalVisits</p>
     </div>
     <div class="grid-item">
-        <h3>Emails send with (hoppefully) job offer</h3>
+        <h3>Emails sent (hopefully with job offers)</h3>
         <p>@GetTotalEmailsSent</p>
     </div>
     <div class="grid-item">
-        <h3>Visits in this week vs last week</h3>
+        <h3>Visits this week vs. last week (in %)</h3>
         <p>@WeekToWeekVisits</p>
     </div>
     <div class="grid-item">
-        <h3>Avarage visit duration in minutes</h3>
+        <h3>Average visit duration (in minutes)</h3>
         <p>@AvarageVisitDuration</p>
     </div>
 </div>
+
 
 
 @code {

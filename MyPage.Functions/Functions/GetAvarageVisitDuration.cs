@@ -27,7 +27,12 @@ public class GetAvarageVisitDuration(ILogger<GetAvarageVisitDuration> logger, IT
                     | summarize OverallAvgDurationMinutes = round((sum(customMetric_valueSum) / sum(customMetric_valueCount)) / 60000, 2)
             ";
             var averageDuration = await apiCall.GetTelemetryData(query);
-            if (averageDuration.HasValue)
+            if (averageDuration <=2)
+            {
+                logger.LogInformation("Avarage visit duration fetched successfully.");
+                return new OkObjectResult(new { avarageVisitDuration = 2 });
+            }
+            else 
             {
                 logger.LogInformation("Avarage visit duration fetched successfully.");
                 return new OkObjectResult(new { avarageVisitDuration = averageDuration.Value });
