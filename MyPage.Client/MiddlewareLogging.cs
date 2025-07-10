@@ -1,46 +1,79 @@
-﻿using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.DataContracts;
+﻿using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.Extensions.Logging;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace MyPage.Client
 {
-    public class MiddlewareLogging(HttpClient httpClient, ILogger<MiddlewareLogging> logger, TelemetryClient telemetryClient) : IMiddlewareLogging
+    public class MiddlewareLogging(HttpClient httpClient, ILogger<MiddlewareLogging> logger) : IMiddlewareLogging
     {
-        private static readonly JsonSerializerOptions CachedJsonSerializerOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions CachedJsonSerializerOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public async Task<T?> GetFromJsonAsync<T>(string reqesturl, string methodName = "")
+        private async Task SendLogToFunction(string message, bool isError, SeverityLevel severity, Dictionary<string, string> properties)
         {
             try
             {
-                logger.LogInformation("Api call started for {MethodName} with URL: {RequestUrl}", methodName, reqesturl);
-                var response = await httpClient.GetAsync(reqesturl);
+                var logEntry = new
+                {
+                    Message = message,
+                    IsError = isError,
+                    Severity = severity,
+                    Properties = properties
+                };
+
+                // Wysyłanie do Azure Function
+                await httpClient.PostAsJsonAsync("api/logs", logEntry);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to send log to Azure Function");
+            }
+        }
+
+        public async Task<T?> GetFromJsonAsync<T>(string requestUrl, string methodName = "")
+        {
+            try
+            {
+                logger.LogInformation("Api call started for {MethodName} with URL: {RequestUrl}", methodName, requestUrl);
+                var response = await httpClient.GetAsync(requestUrl);
                 var content = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    telemetryClient.TrackTrace($"Api Error:{methodName}", SeverityLevel.Error,
-                    new Dictionary<string, string>
-                    {
+                    await SendLogToFunction(
+                        $"API Error: {methodName}",
+                        isError: true,
+                        SeverityLevel.Error,
+                        new Dictionary<string, string>
+                        {
                             { "MethodName", methodName },
-                            { "RequestUrl", reqesturl },
+                            { "RequestUrl", requestUrl },
                             { "StatusCode", response.StatusCode.ToString() },
                             { "ResponseContent", content }
-                    });
+                        });
 
                     return default;
                 }
+
                 return JsonSerializer.Deserialize<T>(content, CachedJsonSerializerOptions);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "API Exception: {Method} - {Uri}", methodName, reqesturl);
-                telemetryClient.TrackException(ex, new Dictionary<string, string>
+                logger.LogError(ex, "API Exception: {Method} - {Uri}", methodName, requestUrl);
+                await SendLogToFunction(
+                    $"API Exception: {ex.Message}",
+                    isError: true,
+                    SeverityLevel.Error,
+                    new Dictionary<string, string>
                     {
                         { "Method", methodName },
-                        { "Uri", reqesturl }
+                        { "Uri", requestUrl },
+                        { "StackTrace", ex.StackTrace ?? "" }
                     });
+
                 return default;
             }
         }
@@ -51,34 +84,38 @@ namespace MyPage.Client
 
             if (response == null)
             {
-                logger.LogWarning("API returned null: {Method}", methodName);
-                telemetryClient.TrackTrace($"API returned null: {methodName}", SeverityLevel.Warning,
+                await SendLogToFunction(
+                    $"API returned null: {methodName}",
+                    isError: false,
+                    SeverityLevel.Warning,
                     new Dictionary<string, string>
                     {
-                            { "Method", methodName },
-                            { "Uri", requestUri },
-                            { "Issue", "NullResponse" }
+                        { "Method", methodName },
+                        { "Uri", requestUri },
+                        { "Issue", "NullResponse" }
                     });
-                telemetryClient.Flush();
+
                 return defaultValue;
             }
 
             if (!response.TryGetValue(valueKey, out var value))
             {
-                logger.LogWarning("API missing key '{Key}': {Method}. Available keys: {Keys}",
-                    valueKey, methodName, string.Join(", ", response.Keys));
-                telemetryClient.TrackTrace($"API missing key: {methodName}", SeverityLevel.Warning,
+                await SendLogToFunction(
+                    $"API missing key '{valueKey}': {methodName}",
+                    isError: false,
+                    SeverityLevel.Warning,
                     new Dictionary<string, string>
                     {
-                            { "Method", methodName },
-                            { "Uri", requestUri },
-                            { "MissingKey", valueKey },
-                            { "AvailableKeys", string.Join(", ", response.Keys) },
-                            { "Issue", "MissingKey" }
+                        { "Method", methodName },
+                        { "Uri", requestUri },
+                        { "MissingKey", valueKey },
+                        { "AvailableKeys", string.Join(", ", response.Keys) },
+                        { "Issue", "MissingKey" }
                     });
-                telemetryClient.Flush();
+
                 return defaultValue;
             }
+
             logger.LogInformation("API Success: {Method} - {Key}={Value}", methodName, valueKey, value);
             return value;
         }
