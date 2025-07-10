@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
+builder.Services.AddScoped<IMiddlewareLogging, MiddlewareLogging>();
 
 builder.Services.AddScoped(sp => new HttpClient
 {
