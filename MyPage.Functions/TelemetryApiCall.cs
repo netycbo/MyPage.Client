@@ -1,4 +1,5 @@
 ﻿using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -24,13 +25,27 @@ namespace MyPage.Functions
             var request = new HttpRequestMessage(HttpMethod.Get, $"{uri}?query={Uri.EscapeDataString(query)}");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Add("x-api-key", apiKey);
-
+            telemetry.TrackTrace("AppInsights config", SeverityLevel.Information, new Dictionary<string, string>
+            {
+                { "AppId", appId ?? "null" },
+                { "ApiKey", string.IsNullOrWhiteSpace(apiKey) ? "NO" : "YES" }
+            });
             try
             {
                 var response = await _httpClient.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogError($"Błąd HTTP: {(int)response.StatusCode} {response.ReasonPhrase}");
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    logger.LogError($"Błąd HTTP: {(int)response.StatusCode} {response.ReasonPhrase}. Body: {errorContent}");
+
+                    telemetry.TrackException(new HttpRequestException($"AppInsights 404: {uri}"),
+                        new Dictionary<string, string>
+                        {
+                    { "Query", query },
+                    { "StatusCode", ((int)response.StatusCode).ToString() },
+                    { "ResponseBody", errorContent }
+                        });
+
                     return null;
                 }
 

@@ -61,6 +61,6 @@ public class GetWeekToWeekVisits(ILogger<GetWeekToWeekVisits> logger, ITelemetry
                 { "QueryString", req.QueryString.ToString() }
             });
         }
-        return new BadRequestObjectResult(new { error = "Unable to fetch total GetWeekToWeekVisits." });
+        return new BadRequestObjectResult(new { error = "Unable to fetch total GetWeekToWeekVisits." }); 
     }
 }
