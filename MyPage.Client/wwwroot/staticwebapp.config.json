@@ -1,13 +1,12 @@
 {
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [ "/api/*", "/*.{js,css,ico,png,jpg,svg,woff,woff2}" ]
+  },
   "routes": [
     {
       "route": "/api/*",
       "allowedRoles": [ "anonymous" ]
-    },
-    {
-      "route": "/*",
-      "rewrite": "/index.html",
-      "statusCode": 200
     }
   ],
   "responseOverrides": {
