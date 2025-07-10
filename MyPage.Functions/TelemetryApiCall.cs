@@ -26,7 +26,7 @@ namespace MyPage.Functions
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Add("x-api-key", apiKey);
             telemetry.TrackTrace("AppInsights config", SeverityLevel.Information, new Dictionary<string, string>
-            {
+        {
                 { "AppId", appId ?? "null" },
                 { "ApiKey", string.IsNullOrWhiteSpace(apiKey) ? "NO" : "YES" }
             });

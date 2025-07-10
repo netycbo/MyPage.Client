@@ -3,6 +3,11 @@
     {
       "route": "/api/*",
       "allowedRoles": [ "anonymous" ]
+    },
+    {
+      "route": "/*",
+      "rewrite": "/index.html",
+      "statusCode": 200
     }
   ],
   "responseOverrides": {

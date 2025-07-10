@@ -50,35 +50,35 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // try
-        // {
-        //     var httpResponse = await Http.GetAsync("/api/GetAvarageVisitDuration");
+        try
+        {
+            var httpResponse = await Http.GetAsync("/api/GetAvarageVisitDuration");
 
-        //     if (!httpResponse.IsSuccessStatusCode)
-        //     {
-        //         Console.WriteLine($"Error {httpResponse.StatusCode}: {await httpResponse.Content.ReadAsStringAsync()}");
-        //         AvarageVisitDuration = 0;
-        //         return;
-        //     }
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Error {httpResponse.StatusCode}: {await httpResponse.Content.ReadAsStringAsync()}");
+                AvarageVisitDuration = 0;
+                return;
+            }
 
-        //     var content = await httpResponse.Content.ReadAsStringAsync();
-        //     var parsed = JsonSerializer.Deserialize<Dictionary<string, int>>(content);
-        //     AvarageVisitDuration = parsed?.GetValueOrDefault("avarageVisitDuration", 0) ?? 0;
-        // }
-        // catch (Exception ex)
-        // {
-        //     Console.WriteLine($"Exception: {ex.Message}");
-        //     AvarageVisitDuration = 0;
-        // }
+            var content = await httpResponse.Content.ReadAsStringAsync();
+            var parsed = JsonSerializer.Deserialize<Dictionary<string, int>>(content);
+            AvarageVisitDuration = parsed?.GetValueOrDefault("avarageVisitDuration", 0) ?? 0;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+            AvarageVisitDuration = 0;
+        }
        
         var responseForTotalVisits = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetTotalVisit");
         GetTotalVisits = responseForTotalVisits != null && responseForTotalVisits.TryGetValue("totalVisits", out var totalVisits) ? totalVisits : 666;
 
-        // var responseForTotalEmailsSent = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetTotalEmailsSent");
-        // GetTotalEmailsSent = responseForTotalEmailsSent != null && responseForTotalEmailsSent.TryGetValue("totalEmailsSent", out var totalEmailsSent) ? totalEmailsSent : 69;
+        var responseForTotalEmailsSent = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetTotalEmailsSent");
+        GetTotalEmailsSent = responseForTotalEmailsSent != null && responseForTotalEmailsSent.TryGetValue("totalEmailsSent", out var totalEmailsSent) ? totalEmailsSent : 69;
 
-        // var responseForWeekToWeekVisits = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetWeekToWeekVisits");
-        // WeekToWeekVisits = responseForWeekToWeekVisits != null && responseForWeekToWeekVisits.TryGetValue("weekToWeekVisits", out var weekToWeekVisits) ? weekToWeekVisits : 0;
+        var responseForWeekToWeekVisits = await Http.GetFromJsonAsync<Dictionary<string, int>>("/api/GetWeekToWeekVisits");
+        WeekToWeekVisits = responseForWeekToWeekVisits != null && responseForWeekToWeekVisits.TryGetValue("weekToWeekVisits", out var weekToWeekVisits) ? weekToWeekVisits : 0;
     }
 }
 
