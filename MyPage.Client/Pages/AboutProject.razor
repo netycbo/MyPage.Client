@@ -26,37 +26,106 @@
 
 <div class="containerAbout grid-container">
     <div class="grid-item">
-        <h3>Total page visits since deployment (02.07.2025)</h3>
-        <p>@GetTotalVisits</p>
+        <h3>Total page visits since deployment</h3>
+        @if (IsLoading("visits"))
+        {
+            <span class="cloudLoader"></span>
+        }
+        else
+        {
+            <p>@GetTotalVisits</p>
+        }
+       
     </div>
     <div class="grid-item">
         <h3>Emails sent (hopefully with job offers)</h3>
-        <p>@GetTotalEmailsSent</p>
+        @if (IsLoading("emails"))
+        {
+            <span class="cloudLoader"></span>
+        }
+        else
+        {
+            <p>@GetTotalEmailsSent</p>
+        }
     </div>
     <div class="grid-item">
         <h3>Visits this week vs. last week (in %)</h3>
-        <p>@WeekToWeekVisits</p>
+        @if (IsLoading("week"))
+        {
+            <span class="cloudLoader"></span>
+        }
+        else
+        {
+            <p>@WeekToWeekVisits</p>
+        }
     </div>
     <div class="grid-item">
         <h3>Average visit duration (in minutes)</h3>
-        <p>@AvarageVisitDuration</p>
+        @if (IsLoading("duration"))
+        {
+            <span class="cloudLoader"></span>
+        }
+        else
+        {
+            <p>@AvarageVisitDuration</p>
+        }
     </div>
 </div>
 
 
 
 @code {
+    private readonly Dictionary<string, bool> loadingStates = new()
+{
+    { "visits", true },
+    { "emails", true },
+    { "week", true },
+    { "duration", true }
+};
     private int GetTotalVisits { get; set; }
     private int GetTotalEmailsSent { get; set; }
     private int WeekToWeekVisits { get; set; }
     private int AvarageVisitDuration { get; set; }
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
+        _ = LoadVisitsAsync();
+        _ = LoadEmailsAsync();
+        _ = LoadWeekVisitsAsync();
+        _ = LoadDurationAsync();
+    }
+    private bool IsLoading(string key) => loadingStates.ContainsKey(key) && loadingStates[key];
+
+    private void SetLoading(string key, bool value)
+    {
+        if (loadingStates.ContainsKey(key))
+        {
+            loadingStates[key] = value;
+            StateHasChanged();
+        }
+    }
+    private async Task LoadVisitsAsync()
+    {
         GetTotalVisits = await Logging.GetIntValueAsync("/api/GetTotalVisit", "total", 0, "GetAvarageVisitDuration");
+        SetLoading("visits", false);
+    }
+    private async Task LoadEmailsAsync()
+    {
         GetTotalEmailsSent = await Logging.GetIntValueAsync("/api/GetTotalEmailsSent", "totalEmailsSent", 0, "GetTotalEmailsSent");
+        SetLoading("emails", false);
+    }
+
+    private async Task LoadWeekVisitsAsync()
+    {
         WeekToWeekVisits = await Logging.GetIntValueAsync("/api/GetWeekToWeekVisits", "weekToWeekVisits", 0, "GetWeekToWeekVisits");
+        SetLoading("week", false);
+    }
+
+    private async Task LoadDurationAsync()
+    {
         AvarageVisitDuration = await Logging.GetIntValueAsync("/api/GetAvarageVisitDuration", "avarageVisitDuration", 2, "GetAvarageVisitDuration");
+        SetLoading("duration", false);
     }
 }
 
